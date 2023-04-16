@@ -31,7 +31,29 @@ public class Bootstrapper {
     }
 
     private static void updateContact() {
-        System.out.println("debug - update contact");
+        System.out.println("\nFormulaire de modification d'un contact");
+        System.out.print("Identifiant: ");
+        int id = Integer.parseInt(input.nextLine());
+        System.out.print("Prénom: ");
+        String firstName = input.nextLine();
+        System.out.print("Nom de famille: ");
+        String lastName = input.nextLine();
+        System.out.print("Email: ");
+        String email = input.nextLine();
+        System.out.print("Téléphone: ");
+        String phone = input.nextLine();
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
+            String sql = "update CONTACT set FIRSTNAME=?, LASTNAME=?, EMAIL=?, PHONE=? where ID=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setString(3, email);
+            preparedStatement.setString(4, phone);
+            preparedStatement.setInt(5, id);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void addContact() {
