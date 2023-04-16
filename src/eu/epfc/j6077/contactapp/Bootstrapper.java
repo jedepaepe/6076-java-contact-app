@@ -27,7 +27,17 @@ public class Bootstrapper {
     }
 
     private static void deleteContact() {
-        System.out.println("debug - delete contact");
+        System.out.println("\nFormulaire de suppression d'un contact");
+        System.out.print("Identifiant: ");
+        int id = Integer.parseInt(input.nextLine());
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
+            String sql = "delete CONTACT where ID=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void updateContact() {
