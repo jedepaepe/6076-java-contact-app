@@ -19,7 +19,29 @@ public class Bootstrapper {
             System.out.println("(4) supprimer un contact");
             System.out.println("(Q) quitter l'application");
             choice = input.nextLine();
+            switch (choice) {
+                case "1" -> consultContacts();
+                case "2" -> addContact();
+                case "3" -> updateContact();
+                case "4" -> deleteContact();
+            }
         } while (! choice.equals("Q"));
+    }
+
+    private static void deleteContact() {
+        System.out.println("debug - delete contact");
+    }
+
+    private static void updateContact() {
+        System.out.println("debug - update contact");
+    }
+
+    private static void addContact() {
+        System.out.println("debug - add contact");
+    }
+
+    private static void consultContacts() {
+        System.out.println("debug - consult contacts");
     }
 
     private static void initializeDb() {
