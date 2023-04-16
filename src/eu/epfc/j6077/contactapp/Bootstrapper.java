@@ -4,9 +4,10 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Bootstrapper {
+    static Scanner input = new Scanner(System.in);
+
     public static void main(String[] args) {
         initializeDb();
-        Scanner input = new Scanner(System.in);
         String choice;
         do {
             System.out.println("\nChoisissez dans les options suivantes");
@@ -34,16 +35,15 @@ public class Bootstrapper {
     }
 
     private static void addContact() {
-        Scanner scanner = new Scanner(System.in);
         System.out.println("\nFormulaire de contact");
         System.out.print("Prénom: ");
-        String firstName = scanner.nextLine();
+        String firstName = input.nextLine();
         System.out.print("Nom de famille: ");
-        String lastName = scanner.nextLine();
+        String lastName = input.nextLine();
         System.out.print("Email: ");
-        String email = scanner.nextLine();
+        String email = input.nextLine();
         System.out.print("Téléphone: ");
-        String phone = scanner.nextLine();
+        String phone = input.nextLine();
         try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
             String sql = "insert into CONTACT (FIRSTNAME, LASTNAME, EMAIL, PHONE) VALUES (?,?,?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -55,7 +55,6 @@ public class Bootstrapper {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        scanner.close();
     }
 
     private static void consultContacts() {
