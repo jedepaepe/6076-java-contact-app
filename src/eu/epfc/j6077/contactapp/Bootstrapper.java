@@ -1,9 +1,6 @@
 package eu.epfc.j6077.contactapp;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Bootstrapper {
@@ -12,7 +9,7 @@ public class Bootstrapper {
         Scanner input = new Scanner(System.in);
         String choice;
         do {
-            System.out.println("Choisissez dans les options suivantes");
+            System.out.println("\nChoisissez dans les options suivantes");
             System.out.println("(1) lister les contacts");
             System.out.println("(2) ajouter un contact");
             System.out.println("(3) modifier un contact");
@@ -41,7 +38,22 @@ public class Bootstrapper {
     }
 
     private static void consultContacts() {
-        System.out.println("debug - consult contacts");
+        System.out.println("\nListe des contacts:");
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")){
+            String sql = "select ID, FIRSTNAME, LASTNAME, EMAIL, PHONE from CONTACT";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            while (resultSet.next()) {
+                int id = resultSet.getInt("ID");
+                String firstName = resultSet.getString("FIRSTNAME");
+                String lastName = resultSet.getString("LASTNAME");
+                String email = resultSet.getString("EMAIL");
+                String phone = resultSet.getString("PHONE");
+                System.out.println(String.join(" - ", "" + id, firstName, lastName, email, phone));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void initializeDb() {
