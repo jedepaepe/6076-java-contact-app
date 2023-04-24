@@ -1,13 +1,15 @@
 package eu.epfc.j6077.contactapp;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
-public class Bootstrapper {
+public class ContactApplication {
     static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
-        initializeDb();
+        initializeDB();
         String choice;
         do {
             System.out.println("\nChoisissez dans les options suivantes");
@@ -67,6 +69,7 @@ public class Bootstrapper {
     }
 
     private static void addContact() {
+        // formulaire
         System.out.println("\nFormulaire de contact");
         System.out.print("Prénom: ");
         String firstName = input.nextLine();
@@ -76,6 +79,7 @@ public class Bootstrapper {
         String email = input.nextLine();
         System.out.print("Téléphone: ");
         String phone = input.nextLine();
+        // insert in DB
         try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
             String sql = "insert into CONTACT (FIRSTNAME, LASTNAME, EMAIL, PHONE) VALUES (?,?,?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -90,7 +94,12 @@ public class Bootstrapper {
     }
 
     private static void consultContacts() {
-        System.out.println("\nListe des contacts:");
+        List<Contact> contacts = fetchContactsDB();
+        showListUI(contacts);
+    }
+
+    private static List<Contact> fetchContactsDB() {
+        List<Contact> contacts = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")){
             String sql = "select ID, FIRSTNAME, LASTNAME, EMAIL, PHONE from CONTACT";
             Statement statement = connection.createStatement();
@@ -101,14 +110,24 @@ public class Bootstrapper {
                 String lastName = resultSet.getString("LASTNAME");
                 String email = resultSet.getString("EMAIL");
                 String phone = resultSet.getString("PHONE");
-                System.out.println(String.join(" - ", "" + id, firstName, lastName, email, phone));
+                Contact contact = new Contact(id, firstName, lastName, email, phone);
+                contacts.add(contact);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return contacts;
     }
 
-    private static void initializeDb() {
+    private static void showListUI(List<Contact> contacts) {
+        System.out.println("\nListe des contacts:");
+        for(Contact c : contacts) {
+            System.out.println(String.join(" - ", String.valueOf(c.getId()), c.getFirstName(), c.getLastName(),
+                    c.getEmail(), c.getPhone()));
+        }
+    }
+
+    private static void initializeDB() {
         String sql = "create table if not exists CONTACT (" +
                 "  ID integer primary key auto_increment," +
                 "  FIRSTNAME varchar(32) not null," +
