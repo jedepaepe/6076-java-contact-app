@@ -1,15 +1,9 @@
 package eu.epfc.j6077.contactapp;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 public class ContactApplication {
-    static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
-        initializeDB();
+        ContactDao.initialize();
         String choice;
         do {
             System.out.println("\nChoisissez dans les options suivantes");
@@ -18,129 +12,14 @@ public class ContactApplication {
             System.out.println("(3) modifier un contact");
             System.out.println("(4) supprimer un contact");
             System.out.println("(Q) quitter l'application");
-            choice = input.nextLine();
+            choice = ContactUI.input.nextLine();
             switch (choice) {
-                case "1" -> consultContacts();
-                case "2" -> addContact();
-                case "3" -> updateContact();
-                case "4" -> deleteContact();
+                case "1" -> ContactUC.consultContacts();
+                case "2" -> ContactUC.addContact();
+                case "3" -> ContactUC.updateContact();
+                case "4" -> ContactUC.deleteContact();
             }
         } while (! choice.equals("Q"));
     }
 
-    private static void deleteContact() {
-        System.out.println("\nFormulaire de suppression d'un contact");
-        System.out.print("Identifiant: ");
-        int id = Integer.parseInt(input.nextLine());
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
-            String sql = "delete CONTACT where ID=?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, id);
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void updateContact() {
-        System.out.println("\nFormulaire de modification d'un contact");
-        System.out.print("Identifiant: ");
-        int id = Integer.parseInt(input.nextLine());
-        System.out.print("Prénom: ");
-        String firstName = input.nextLine();
-        System.out.print("Nom de famille: ");
-        String lastName = input.nextLine();
-        System.out.print("Email: ");
-        String email = input.nextLine();
-        System.out.print("Téléphone: ");
-        String phone = input.nextLine();
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
-            String sql = "update CONTACT set FIRSTNAME=?, LASTNAME=?, EMAIL=?, PHONE=? where ID=?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, firstName);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setString(3, email);
-            preparedStatement.setString(4, phone);
-            preparedStatement.setInt(5, id);
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void addContact() {
-        // formulaire
-        System.out.println("\nFormulaire de contact");
-        System.out.print("Prénom: ");
-        String firstName = input.nextLine();
-        System.out.print("Nom de famille: ");
-        String lastName = input.nextLine();
-        System.out.print("Email: ");
-        String email = input.nextLine();
-        System.out.print("Téléphone: ");
-        String phone = input.nextLine();
-        // insert in DB
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")) {
-            String sql = "insert into CONTACT (FIRSTNAME, LASTNAME, EMAIL, PHONE) VALUES (?,?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, firstName);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setString(3, email);
-            preparedStatement.setString(4, phone);
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void consultContacts() {
-        List<Contact> contacts = fetchContactsDB();
-        showListUI(contacts);
-    }
-
-    private static List<Contact> fetchContactsDB() {
-        List<Contact> contacts = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:./contact")){
-            String sql = "select ID, FIRSTNAME, LASTNAME, EMAIL, PHONE from CONTACT";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) {
-                int id = resultSet.getInt("ID");
-                String firstName = resultSet.getString("FIRSTNAME");
-                String lastName = resultSet.getString("LASTNAME");
-                String email = resultSet.getString("EMAIL");
-                String phone = resultSet.getString("PHONE");
-                Contact contact = new Contact(id, firstName, lastName, email, phone);
-                contacts.add(contact);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return contacts;
-    }
-
-    private static void showListUI(List<Contact> contacts) {
-        System.out.println("\nListe des contacts:");
-        for(Contact c : contacts) {
-            System.out.println(String.join(" - ", String.valueOf(c.getId()), c.getFirstName(), c.getLastName(),
-                    c.getEmail(), c.getPhone()));
-        }
-    }
-
-    private static void initializeDB() {
-        String sql = "create table if not exists CONTACT (" +
-                "  ID integer primary key auto_increment," +
-                "  FIRSTNAME varchar(32) not null," +
-                "  LASTNAME varchar(32) not null," +
-                "  EMAIL varchar(128)," +
-                "  PHONE varchar(20)" +
-                ")";
-        try {
-            Connection connection = DriverManager.getConnection("jdbc:h2:./contact");
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
